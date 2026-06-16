@@ -130,6 +130,9 @@ function setupEventListeners() {
     
     // Theme Toggle Actions
     elements.themeToggle.addEventListener('change', toggleTheme);
+    
+    // Keyboard Shortcuts Actions
+    window.addEventListener('keydown', handleKeyboardShortcuts);
 }
 
 // Fetch releases from API
@@ -771,5 +774,35 @@ function toggleTheme(e) {
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
         showToast('Switched to Dark theme!');
+    }
+}
+
+// Global Keyboard Shortcuts handler
+function handleKeyboardShortcuts(e) {
+    // Check if the Tweet Composer modal is open
+    const isModalOpen = elements.tweetModal.style.display === 'flex';
+    if (!isModalOpen) return;
+    
+    // 1. Escape key closes the modal
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        closeTweetModal();
+        return;
+    }
+    
+    // 2. Ctrl+Enter or Cmd+Enter posts/submits the tweet
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        
+        // Calculate total characters to check if within limit
+        const text = elements.tweetTextarea.value;
+        const linkLength = currentTweetLink ? 24 : 0;
+        const totalCount = text.length + linkLength;
+        
+        if (totalCount <= 280) {
+            sendTweetToTwitter();
+        } else {
+            showToast('Cannot post: Tweet exceeds the 280-character limit!');
+        }
     }
 }
