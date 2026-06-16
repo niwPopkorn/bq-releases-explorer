@@ -28,6 +28,7 @@ const elements = {
     selectedCount: document.getElementById('selected-count'),
     clearSelectionBtn: document.getElementById('clear-selection-btn'),
     tweetSelectedBtn: document.getElementById('tweet-selected-btn'),
+    exportCsvBtn: document.getElementById('export-csv-btn'),
     
     // Nav Items
     navAll: document.getElementById('nav-all'),
@@ -109,6 +110,9 @@ function setupEventListeners() {
     // Selection Drawer Actions
     elements.clearSelectionBtn.addEventListener('click', clearSelection);
     elements.tweetSelectedBtn.addEventListener('click', openTweetModalForSelected);
+    
+    // Export Action
+    elements.exportCsvBtn.addEventListener('click', exportToCSV);
     
     // Modal Actions
     elements.closeModalBtn.addEventListener('click', closeTweetModal);
@@ -330,10 +334,9 @@ function renderStats() {
     elements.distributionList.innerHTML = html;
 }
 
-// Render main feed
-function renderFeed() {
-    // Filter updates
-    let filtered = state.parsedUpdates.filter(update => {
+// Helper to get filtered updates list
+function getFilteredUpdates() {
+    return state.parsedUpdates.filter(update => {
         // Filter by category
         if (state.currentFilter !== 'all' && update.type !== state.currentFilter) {
             return false;
@@ -354,6 +357,12 @@ function renderFeed() {
         
         return true;
     });
+}
+
+// Render main feed
+function renderFeed() {
+    // Filter updates
+    let filtered = getFilteredUpdates();
     
     // Toggle Empty State
     if (filtered.length === 0) {
@@ -409,10 +418,16 @@ function renderFeed() {
                             <span>Official Docs</span>
                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         </a>
-                        <button class="tweet-card-btn" data-id="${update.id}" title="Compose a Tweet about this update">
-                            <i class="fa-brands fa-x-twitter"></i>
-                            <span>Tweet Update</span>
-                        </button>
+                        <div class="card-actions-row">
+                            <button class="copy-card-btn" data-id="${update.id}" title="Copy this update to clipboard">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                            <button class="tweet-card-btn" data-id="${update.id}" title="Compose a Tweet about this update">
+                                <i class="fa-brands fa-x-twitter"></i>
+                                <span>Tweet Update</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -434,6 +449,15 @@ function renderFeed() {
             }
             toggleCardSelection(card.dataset.id);
         });
+        
+        // Copy button event
+        const copyBtn = card.querySelector('.copy-card-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyCardToClipboard(copyBtn.dataset.id);
+            });
+        }
         
         // Tweet button event
         const tweetBtn = card.querySelector('.tweet-card-btn');
@@ -651,4 +675,65 @@ function showToast(message) {
     setTimeout(() => {
         elements.toast.classList.remove('show');
     }, 3000);
+}
+
+// Copy individual card details to clipboard
+function copyCardToClipboard(updateId) {
+    const update = state.parsedUpdates.find(u => u.id === updateId);
+    if (!update) return;
+    
+    const categoryLabel = CATEGORY_MAP[update.type]?.label || 'BigQuery Update';
+    const textToCopy = `BigQuery Release (${update.date}) - ${categoryLabel}:\n\n${update.text}\n\nRead more: ${update.link}`;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast('Update copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showToast('Failed to copy text.');
+    });
+}
+
+// Export current filtered updates to CSV file
+function exportToCSV() {
+    const filtered = getFilteredUpdates();
+    if (filtered.length === 0) {
+        showToast('No updates to export.');
+        return;
+    }
+    
+    // CSV headers
+    const headers = ['Date', 'Category', 'Update Content', 'Source Link'];
+    
+    // Convert updates into CSV rows
+    const rows = filtered.map(u => [
+        u.date,
+        CATEGORY_MAP[u.type]?.label || u.type,
+        u.text,
+        u.link
+    ]);
+    
+    // Convert to CSV string format with proper quotes escaping
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(val => {
+            const escaped = String(val).replace(/"/g, '""');
+            return `"${escaped}"`;
+        }).join(','))
+    ].join('\n');
+    
+    try {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `bigquery_releases_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('CSV export downloaded!');
+    } catch (error) {
+        console.error('CSV export failed: ', error);
+        showToast('Failed to export CSV.');
+    }
 }

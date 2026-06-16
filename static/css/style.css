@@ -678,7 +678,12 @@ a:hover {
     color: var(--primary-hover);
 }
 
-.tweet-card-btn {
+.card-actions-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.copy-card-btn, .tweet-card-btn {
     background-color: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
@@ -694,13 +699,13 @@ a:hover {
     transition: all var(--transition-fast);
 }
 
-.tweet-card-btn:hover {
+.copy-card-btn:hover, .tweet-card-btn:hover {
     background-color: rgba(255, 255, 255, 0.04);
     color: var(--text-primary);
     border-color: var(--text-secondary);
 }
 
-.tweet-card-btn i {
+.copy-card-btn i, .tweet-card-btn i {
     font-size: 0.85rem;
 }
 
