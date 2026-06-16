@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Explorer & Tweet Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Left Brand Panel -->
+        <header class="sidebar-brand">
+            <div class="brand-logo">
+                <i class="fa-solid fa-database logo-icon"></i>
+                <div class="brand-text">
+                    <h1>BigQuery</h1>
+                    <span>Release Explorer</span>
+                </div>
+            </div>
+            
+            <nav class="side-nav">
+                <div class="nav-section-title">Navigation</div>
+                <a href="#" class="nav-item active" id="nav-all">
+                    <i class="fa-solid fa-list-ul"></i> All Releases
+                </a>
+                <a href="#" class="nav-item" id="nav-favorites">
+                    <i class="fa-solid fa-star"></i> Saved / Selected
+                </a>
+                
+                <div class="nav-section-title">Feed Status</div>
+                <div class="status-card">
+                    <div class="status-indicator">
+                        <span class="pulse-dot"></span>
+                        <span id="cache-status">Checking...</span>
+                    </div>
+                    <button id="refresh-btn" class="refresh-button">
+                        <i class="fa-solid fa-arrows-rotate spinner-icon" id="refresh-icon"></i>
+                        <span>Sync Notes</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="brand-footer">
+                <p>v1.0.0 &bull; Built with Flask &amp; CSS3</p>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Action bar -->
+            <div class="top-bar">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search release notes by keyword (e.g. Gemini, SQL, table)..." aria-label="Search release notes">
+                    <button id="clear-search" class="clear-search-btn" style="display: none;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                
+                <div class="quick-stats-top">
+                    <div class="stat-pill" id="stat-total-notes">
+                        <span class="stat-number">-</span>
+                        <span class="stat-label">Total Notes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Categories Row -->
+            <section class="filters-section">
+                <div class="filter-pills-container" id="filter-pills">
+                    <button class="filter-pill active" data-type="all">All Updates</button>
+                    <!-- Dynamically populated categories -->
+                </div>
+            </section>
+
+            <!-- Error Banner -->
+            <div class="alert alert-danger" id="error-banner" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+                <span class="alert-message">Something went wrong. Please try again.</span>
+                <button class="alert-close-btn" id="close-error-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Feed Section -->
+                <section class="feed-section">
+                    <!-- Loading State -->
+                    <div class="loading-state" id="loading-state">
+                        <div class="loader">
+                            <div class="loader-ring"></div>
+                            <div class="loader-ring"></div>
+                            <div class="loader-ring"></div>
+                        </div>
+                        <h3>Fetching Release Notes</h3>
+                        <p>Connecting to Google Cloud feed...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <i class="fa-solid fa-circle-info empty-icon"></i>
+                        <h3>No release notes found</h3>
+                        <p>Try adjusting your search filters or force-refreshing the feed.</p>
+                        <button class="btn btn-primary" id="empty-refresh-btn">Sync Feed</button>
+                    </div>
+
+                    <!-- Release Notes Container -->
+                    <div class="releases-feed" id="releases-feed">
+                        <!-- Grouped release notes go here -->
+                    </div>
+                </section>
+
+                <!-- Sidebar Info Panel (Desktop) -->
+                <aside class="right-panel">
+                    <!-- Distribution Card -->
+                    <div class="panel-card distribution-card">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Update Types</h3>
+                        <div class="distribution-list" id="distribution-list">
+                            <!-- Dynamically populated stats -->
+                            <div class="skeleton-stat"></div>
+                            <div class="skeleton-stat"></div>
+                            <div class="skeleton-stat"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet Assistant Info -->
+                    <div class="panel-card tweet-guide-card">
+                        <h3><i class="fa-solid fa-bullhorn animate-pulse"></i> How to Share</h3>
+                        <div class="guide-steps">
+                            <div class="guide-step">
+                                <div class="step-num">1</div>
+                                <div class="step-text">Browse the release notes feed on the left.</div>
+                            </div>
+                            <div class="guide-step">
+                                <div class="step-num">2</div>
+                                <div class="step-text">Click on any card to <strong>select</strong> it, or click the <i class="fa-brands fa-x-twitter"></i> button directly on the card.</div>
+                            </div>
+                            <div class="guide-step">
+                                <div class="step-num">3</div>
+                                <div class="step-text">Review and edit your tweet in the composer, then post!</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Selection Drawer (Slides up when notes are selected) -->
+    <div class="selection-drawer" id="selection-drawer">
+        <div class="drawer-content">
+            <div class="drawer-info">
+                <span class="selection-count"><strong id="selected-count">0</strong> update(s) selected</span>
+                <span class="drawer-help">Click individual updates to select/deselect them.</span>
+            </div>
+            <div class="drawer-actions">
+                <button class="btn btn-secondary btn-sm" id="clear-selection-btn">
+                    <i class="fa-solid fa-trash-can"></i> Clear Selection
+                </button>
+                <button class="btn btn-primary" id="tweet-selected-btn">
+                    <i class="fa-brands fa-x-twitter"></i> Tweet Selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tweet Composer Modal -->
+    <div class="modal-backdrop" id="tweet-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h3>
+                <button class="modal-close" id="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-instruction">Draft your tweet below. We've compiled a summary of your selected release note(s).</p>
+                
+                <div class="tweet-textarea-container">
+                    <textarea id="tweet-textarea" rows="6" maxlength="500" placeholder="What's happening?"></textarea>
+                    <div class="tweet-char-counter">
+                        <span id="char-count">0</span>/280
+                    </div>
+                </div>
+
+                <div class="tweet-preview-box">
+                    <span class="preview-tag">Link Attached</span>
+                    <span class="preview-url" id="tweet-link-preview">https://docs.cloud.google.com/...</span>
+                </div>
+
+                <div class="tweet-warning" id="tweet-length-warning" style="display: none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Tweet exceeds the 280-character limit. It might get split or truncated on Twitter.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="copy-tweet-btn">
+                    <i class="fa-regular fa-copy"></i> Copy Text
+                </button>
+                <button class="btn btn-primary btn-tweet-submit" id="submit-tweet-btn">
+                    <span>Post to <i class="fa-brands fa-x-twitter"></i></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div class="toast" id="toast-notification">
+        <i class="fa-solid fa-check-circle toast-icon"></i>
+        <span class="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
