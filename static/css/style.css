@@ -62,6 +62,124 @@
     
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Code Block & Textarea styling variables */
+    --bg-code: rgba(255, 255, 255, 0.06);
+    --text-code: #cbd5e1;
+    --bg-input: rgba(0, 0, 0, 0.25);
+}
+
+/* Light Theme Variables Override */
+:root[data-theme="light"] {
+    --bg-app: #f8fafc;
+    --bg-sidebar: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --bg-card-selected: #e2e8f0;
+    --border-color: #cbd5e1;
+    --border-color-hover: #94a3b8;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --primary: #2563eb;
+    --primary-glow: rgba(37, 99, 235, 0.12);
+    --primary-hover: #1d4ed8;
+    --primary-bg: rgba(37, 99, 235, 0.05);
+    
+    /* Light Mode Type Backgrounds and Borders (for high contrast readability) */
+    --type-feature: #059669;
+    --type-feature-bg: rgba(16, 185, 129, 0.06);
+    --type-feature-border: rgba(16, 185, 129, 0.2);
+    
+    --type-issue: #d97706;
+    --type-issue-bg: rgba(245, 158, 11, 0.06);
+    --type-issue-border: rgba(245, 158, 11, 0.2);
+    
+    --type-deprecated: #dc2626;
+    --type-deprecated-bg: rgba(239, 68, 68, 0.06);
+    --type-deprecated-border: rgba(239, 68, 68, 0.2);
+    
+    --type-changed: #7c3aed;
+    --type-changed-bg: rgba(139, 92, 246, 0.06);
+    --type-changed-border: rgba(139, 92, 246, 0.2);
+    
+    --type-resolved: #2563eb;
+    --type-resolved-bg: rgba(59, 130, 246, 0.06);
+    --type-resolved-border: rgba(59, 130, 246, 0.2);
+    
+    --type-other: #4b5563;
+    --type-other-bg: rgba(107, 114, 128, 0.06);
+    --type-other-border: rgba(107, 114, 128, 0.2);
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05);
+
+    /* Code Block & Textarea overrides */
+    --bg-code: rgba(15, 23, 42, 0.06);
+    --text-code: #0f172a;
+    --bg-input: rgba(15, 23, 42, 0.04);
+}
+
+/* Theme Switch UI Styles */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 2rem;
+    padding-left: 0.5rem;
+}
+
+.theme-icon {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 20px;
+    position: relative;
+    width: 38px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: var(--border-color);
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: var(--transition-normal);
+    border-radius: var(--radius-full);
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 3px;
+    content: "";
+    height: 14px;
+    left: 3px;
+    position: absolute;
+    transition: var(--transition-normal);
+    width: 14px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+}
 }
 
 /* Reset & Global Styles */
@@ -640,10 +758,10 @@ a:hover {
 .release-card-body code {
     font-family: var(--font-mono);
     font-size: 0.85rem;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-code);
     padding: 0.1rem 0.35rem;
     border-radius: var(--radius-sm);
-    color: #cbd5e1;
+    color: var(--text-code);
 }
 
 .release-card-body ul, .release-card-body ol {
@@ -1093,7 +1211,7 @@ a:hover {
 
 .tweet-textarea-container {
     position: relative;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 1rem;

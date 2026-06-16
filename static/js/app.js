@@ -46,7 +46,10 @@ const elements = {
     submitTweetBtn: document.getElementById('submit-tweet-btn'),
     
     // Toast
-    toast: document.getElementById('toast-notification')
+    toast: document.getElementById('toast-notification'),
+    
+    // Theme Toggle
+    themeToggle: document.getElementById('theme-toggle')
 };
 
 // Map of categories/types to human-readable names and icons
@@ -62,6 +65,7 @@ const CATEGORY_MAP = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     setupEventListeners();
     loadReleases();
 });
@@ -123,6 +127,9 @@ function setupEventListeners() {
     elements.tweetTextarea.addEventListener('input', updateTweetCharacterCount);
     elements.copyTweetBtn.addEventListener('click', copyTweetToClipboard);
     elements.submitTweetBtn.addEventListener('click', sendTweetToTwitter);
+    
+    // Theme Toggle Actions
+    elements.themeToggle.addEventListener('change', toggleTheme);
 }
 
 // Fetch releases from API
@@ -735,5 +742,34 @@ function exportToCSV() {
     } catch (error) {
         console.error('CSV export failed: ', error);
         showToast('Failed to export CSV.');
+    }
+}
+
+// Theme Management & Persistence
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Default to dark mode (unchecked)
+    if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        elements.themeToggle.checked = true;
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        elements.themeToggle.checked = false;
+        if (!savedTheme) {
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+}
+
+function toggleTheme(e) {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+        showToast('Switched to Light theme!');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        showToast('Switched to Dark theme!');
     }
 }
